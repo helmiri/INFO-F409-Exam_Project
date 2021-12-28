@@ -13,6 +13,3 @@ This project can be executed with the following command :
 ```
 python runner.py
 ```
-
-## Screenshots
-To do.
