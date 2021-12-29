@@ -36,33 +36,6 @@ def get_payoffs_vector(game: str = "PD", fear=False, greed=False) -> List[int]:
     return pd
 
 
-def train(game: Matrix_Payoffs, habituation: float, aspiration: float,
-          learning_rate: float, nb_repetitions: int, nb_episodes: int) -> Tuple[ndarray, ndarray, ndarray]:
-    """
-    Trains a set of agents on the given game
-    :param game: The payoff matrix
-    :param habituation: h
-    :param aspiration: A
-    :param learning_rate: l
-    :param nb_repetitions: Number of times the training will be repeated
-    :param nb_episodes: Number of training episodes in each repetition
-    :return: A tuple containing: The probabilities of the actions of the agents, the aspirations of the agents and the
-    stimuli during training
-    """
-    action_probabilities = numpy.empty(nb_repetitions, dtype=object)
-    aspirations = numpy.empty(nb_repetitions, dtype=object)
-    stimuli = numpy.empty(nb_repetitions, dtype=object)
-    for repetition in range(nb_repetitions):
-        agents = [Agent(learning_rate, aspiration, habituation) for _ in range(game.num_agents)]
-        model = Bush_Mosteller(agents, game)
-
-        model.run(nb_episodes)
-        action_probabilities[repetition] = model.get_action_probabilities()
-        aspirations[repetition] = model.get_aspirations()
-        stimuli[repetition] = model.get_stimuli_agent()
-    return action_probabilities, aspirations, stimuli
-
-
 def save_data(data: ndarray, filename: str) -> None:
     """
     Serializes a training data set
@@ -100,6 +73,33 @@ def compute_average_evolution(by_agent: Tuple) -> ndarray:
     return (out / len(by_agent)) / len(by_agent[0])
 
 
+def train(game: Matrix_Payoffs, habituation: float, aspiration: float,
+          learning_rate: float, nb_repetitions: int, nb_episodes: int) -> Tuple[ndarray, ndarray, ndarray]:
+    """
+    Trains a set of agents on the given game
+    :param game: The payoff matrix
+    :param habituation: h
+    :param aspiration: A
+    :param learning_rate: l
+    :param nb_repetitions: Number of times the training will be repeated
+    :param nb_episodes: Number of training episodes in each repetition
+    :return: A tuple containing: The probabilities of the actions of the agents, the aspirations of the agents and the
+    stimuli during training
+    """
+    action_probabilities = numpy.empty(nb_repetitions, dtype=object)
+    aspirations = numpy.empty(nb_repetitions, dtype=object)
+    stimuli = numpy.empty(nb_repetitions, dtype=object)
+    for repetition in range(nb_repetitions):
+        agents = [Agent(learning_rate, aspiration, habituation) for _ in range(game.num_agents)]
+        model = Bush_Mosteller(agents, game)
+
+        model.run(nb_episodes)
+        action_probabilities[repetition] = model.get_action_probabilities()
+        aspirations[repetition] = model.get_aspirations()
+        stimuli[repetition] = model.get_stimuli_agent()
+    return action_probabilities, aspirations, stimuli
+
+
 def main() -> None:
     parameters_list = list()
     if len(sys.argv) == 8:
@@ -121,6 +121,7 @@ def main() -> None:
         os.makedirs("data/")
 
     for i, parameters in enumerate(parameters_list):
+        print("- Training: game={0} mode={1} h={2} A={3} l={4} reps={5} eps={6}".format(*parameters), end="")
         floats = numpy.asarray(parameters[2:5], dtype=float)
         ints = numpy.asarray(parameters[5:], dtype=int)
         game = Matrix_Payoffs(get_payoffs_vector(parameters[0], "fear" == parameters[1], "greed" == parameters[1]))
