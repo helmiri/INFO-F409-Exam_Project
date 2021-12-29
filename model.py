@@ -4,22 +4,21 @@ from typing import Tuple, List
 import numpy
 
 from agent import Agent
-from matrix import Matrix
+from matrix_payoffs import Matrix_Payoffs
 
 
 class Bush_Mosteller:
-    def __init__(self, agents: tuple[Agent], game: Matrix, payoffs: Tuple[int]):
+    def __init__(self, agents: List[Agent], game: Matrix_Payoffs):
         """
         :param agents: A list of agents
         :param game: The game to be played
-        :param payoffs: A vector of payoffs
         """
         self.agents = agents
         self.game = game
-        self.payoffs = payoffs
-        self.actions, self.action_probabilities, self.aspirations, self.stimuli = None, None, None, None
+        self.payoffs = game.get_payoffs_vector()
+        self.action_probabilities, self.aspirations, self.stimuli = None, None, None
 
-    def update_agent_aspirations(self, payoffs: List[float]) -> List[float]:
+    def update_agent_aspirations(self, payoffs: Tuple[int]) -> List[float]:
         """
         Update the aspirations of the agents
         :param payoffs: List of payoffs where payoff[i] is the payoff received by agent i
@@ -40,46 +39,37 @@ class Bush_Mosteller:
             stimuli[i] = (payoff - aspiration) / sup
         return stimuli
 
-    def get_agent_actions(self) -> List[int]:
+    def query_next_actions(self) -> List[int]:
         """
         Queries all agents' next action
         :return: A list of actions where the ith element corresponds to action taken by agent i
         """
         return [agent.act() for agent in self.agents]
 
-    def run_episode(self) -> tuple[list[int], list[list[int]], numpy.ndarray, list[float]]:
+    def run_episode(self) -> Tuple[numpy.ndarray, numpy.ndarray, list[float]]:
         """
         Runs a single episode of the game
         :return: A tuple containing: The actions taken by the agents,
         The probabilities of the actions, the stimuli and the aspirations respectively
         """
-        actions = self.get_agent_actions()
+        actions = self.query_next_actions()
         payoffs = self.game.get_payoff(actions)
         stimuli = self.compute_stimuli(payoffs)
         aspirations = self.update_agent_aspirations(payoffs)
 
-        action_probabilities = [[0, 0] for _ in range(len(self.agents))]
+        action_probabilities = numpy.zeros(len(self.agents), dtype=float)
         for i, agent in enumerate(self.agents):
             action_probabilities[i][actions[i]] = agent.learn(stimuli[i], actions[i])
-            action_probabilities[i][1 - actions[i]] = 1 - action_probabilities[i][actions[i]]
 
-        return actions, action_probabilities, stimuli, aspirations
+        return action_probabilities, stimuli, aspirations
 
     def run(self, nb_runs: int) -> None:
-        self.actions = numpy.zeros(nb_runs, dtype=List[int, int])
-        self.aspirations = numpy.zeros(nb_runs, dtype=float)
-        self.action_probabilities = numpy.zeros(nb_runs, dtype=List[float, float])
-        self.stimuli = numpy.zeros(nb_runs, dtype=List[float, float])
+        self.aspirations = numpy.empty(nb_runs, dtype=object)
+        self.action_probabilities = numpy.empty(nb_runs, dtype=object)
+        self.stimuli = numpy.empty(nb_runs, dtype=object)
 
         for i in range(nb_runs):
-
-            self.actions[i], self.action_probabilities[i], self.stimuli[i], self.aspirations[i] = self.run_episode()
-
-    def get_actions(self) -> Tuple[Tuple[int]]:
-        """
-        :return: Tuple containing tuples where the ith tuple contains all the actions of agent i during training
-        """
-        return tuple(zip(*self.actions))
+            self.action_probabilities[i], self.stimuli[i], self.aspirations[i] = self.run_episode()
 
     def get_aspirations(self) -> Tuple[Tuple[float]]:
         """
