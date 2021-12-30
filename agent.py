@@ -3,7 +3,7 @@ import numpy as np
 
 class Agent:
     def __init__(self, learning_rate=0.5, aspiration=2, habituation=0, probab_init=0.5):
-        self.proba = np.full(shape=2, fill_value=probab_init)
+        self.proba = np.full(shape=2, fill_value=probab_init, dtype=np.float64)
         self.leara = learning_rate
         self.aspi = aspiration
         self.habi = habituation
@@ -43,3 +43,6 @@ class Agent:
 
     def get_aspiration(self):
         return self.aspi
+
+    def cpt_stimuli(self, payoff, supremun):
+        return (payoff - self.aspi) / supremun

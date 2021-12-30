@@ -24,7 +24,7 @@ class Bush_Mosteller:
         :param payoffs: List of payoffs where payoff[i] is the payoff received by agent i
         :return: A list of aspirations where the ith element corresponds to the aspiration of agent i
         """
-        return [agent.updt_aspi(payoffs[i]) for i, agent in enumerate(self.agents)]
+        return [agent.updt_aspi(self.payoffs[i]) for i, agent in enumerate(self.agents)]
 
     def compute_stimuli(self, payoffs: Tuple[int]) -> numpy.ndarray:
         """
@@ -32,12 +32,12 @@ class Bush_Mosteller:
         :param payoffs: List of payoffs where payoff[i] is the payoff received by agent i
         :return: A list of stimuli where the ith element corresponds to the stimulus for agent i
         """
-        stimuli = numpy.zeros(len(self.agents))
-        for i, payoff in enumerate(payoffs):
-            aspiration = self.agents[i].get_aspiration()
-            sup = math.ceil(max(payoff - aspiration for payoff in self.payoffs))
-            stimuli[i] = (payoff - aspiration) / sup
-        return stimuli
+        supremi = [self.get_supremum(agent.aspi) for agent in self.agents]
+
+        return [agent.cpt_stimuli(self.payoffs[i], supremi[i]) for i, agent in enumerate(self.agents)]
+
+    def get_supremum(self, aspi):
+        return math.ceil(max(abs(self.payoffs[0]-aspi), abs(self.payoffs[1]-aspi),abs(self.payoffs[2]-aspi), abs(self.payoffs[3]-aspi)))
 
     def query_next_actions(self) -> List[int]:
         """
@@ -57,8 +57,9 @@ class Bush_Mosteller:
         stimuli = self.compute_stimuli(payoffs)
         aspirations = self.update_agent_aspirations(payoffs)
 
-        action_probabilities = numpy.zeros(len(self.agents), dtype=float)
+        action_probabilities = numpy.zeros(len(self.agents), dtype=numpy.float64)
         for i, agent in enumerate(self.agents):
+            print("debug :", agent.learn(stimuli[i], actions[i]))
             action_probabilities[i][actions[i]] = agent.learn(stimuli[i], actions[i])
 
         return action_probabilities, stimuli, aspirations
