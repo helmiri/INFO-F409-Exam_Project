@@ -57,10 +57,9 @@ class Bush_Mosteller:
         stimuli = self.compute_stimuli(payoffs)
         aspirations = self.update_agent_aspirations(payoffs)
 
-        action_probabilities = numpy.zeros(len(self.agents), dtype=numpy.float64)
+        action_probabilities = numpy.zeros(shape=(len(self.agents), 2), dtype=numpy.float64)
         for i, agent in enumerate(self.agents):
-            print("debug :", agent.learn(stimuli[i], actions[i]))
-            action_probabilities[i][actions[i]] = agent.learn(stimuli[i], actions[i])
+            action_probabilities[i] = agent.learn(stimuli[i], actions[i])
 
         return action_probabilities, stimuli, aspirations
 
