@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 import matplotlib.pyplot as plt
 np.set_printoptions(threshold=sys.maxsize) #allows to print the whole array in the terminal

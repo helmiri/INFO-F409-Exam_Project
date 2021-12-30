@@ -44,7 +44,7 @@ def save_data(data: ndarray, filename: str) -> None:
     """
     zipped = tuple(zip(*data))
     for i, agent_data in enumerate(zipped):
-        filename = filename.replace("\n","")
+        filename = filename.replace("\n", "")
         with open("data/agent_{0}_{1}.p".format(str(i), filename), "wb") as dest:
             pickle.dump(agent_data, dest)
 
@@ -122,13 +122,14 @@ def main() -> None:
         os.makedirs("data/")
 
     for i, parameters in enumerate(parameters_list):
-        print("- Training: game={0} mode={1} h={2} A={3} l={4} reps={5} eps={6}".format(*parameters), end="")
+        print("- Training: game={0} mode={1} h={2} A={3} l={4} reps={5} eps={6}\n".format(*parameters), end="")
         floats = numpy.asarray(parameters[2:5], dtype=float)
         ints = numpy.asarray(parameters[5:], dtype=int)
-        game = Matrix_Payoffs(get_payoffs_vector(parameters[0], "fear" == parameters[1], "greed" == parameters[1]))
+        game = Matrix_Payoffs(get_payoffs_vector(parameters[0], "fear" == parameters[1], "greed" == parameters[1]),
+                              parameters[0])
         action_probabilities, aspirations, stimuli = train(game, *floats, *ints)
         filename = "_".join(parameters)
-        filename = filename.replace(".","-")
+        filename = filename.replace(".", "-")
         save_data(action_probabilities, "act_probs_" + filename)
         save_data(aspirations, "asp_" + filename)
         save_data(stimuli, "stim_" + filename)
