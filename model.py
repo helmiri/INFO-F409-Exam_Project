@@ -2,6 +2,7 @@ import math
 from typing import Tuple, List
 
 import numpy
+from numpy import ndarray
 
 from agent import Agent
 from matrix_payoffs import Matrix_Payoffs
@@ -18,26 +19,27 @@ class Bush_Mosteller:
         self.payoffs = game.get_payoffs_vector()
         self.action_probabilities, self.aspirations, self.stimuli = None, None, None
 
-    def update_agent_aspirations(self, payoffs: Tuple[int]) -> List[float]:
+    def update_agent_aspirations(self, rewards: Tuple[int]) -> List[float]:
         """
         Update the aspirations of the agents
-        :param payoffs: List of payoffs where payoff[i] is the payoff received by agent i
+        :param rewards: List of payoffs where payoff[i] is the payoff received by agent i
         :return: A list of aspirations where the ith element corresponds to the aspiration of agent i
         """
-        return [agent.updt_aspi(self.payoffs[i]) for i, agent in enumerate(self.agents)]
+        return [agent.updt_aspi(rewards[i]) for i, agent in enumerate(self.agents)]
 
-    def compute_stimuli(self, payoffs: Tuple[int]) -> numpy.ndarray:
+    def compute_stimuli(self, rewards: Tuple[int]) -> List[float]:
         """
         Computes the stimuli for all agents
-        :param payoffs: List of payoffs where payoff[i] is the payoff received by agent i
+        :param rewards: List of payoffs where payoff[i] is the payoff received by agent i
         :return: A list of stimuli where the ith element corresponds to the stimulus for agent i
         """
         supremi = [self.get_supremum(agent.aspi) for agent in self.agents]
 
-        return [agent.cpt_stimuli(self.payoffs[i], supremi[i]) for i, agent in enumerate(self.agents)]
+        return [agent.cpt_stimuli(rewards[i], supremi[i]) for i, agent in enumerate(self.agents)]
 
     def get_supremum(self, aspi):
-        return math.ceil(max(abs(self.payoffs[0]-aspi), abs(self.payoffs[1]-aspi),abs(self.payoffs[2]-aspi), abs(self.payoffs[3]-aspi)))
+        return math.ceil(max(abs(self.payoffs[0] - aspi), abs(self.payoffs[1] - aspi), abs(self.payoffs[2] - aspi),
+                             abs(self.payoffs[3] - aspi)))
 
     def query_next_actions(self) -> List[int]:
         """
@@ -46,7 +48,7 @@ class Bush_Mosteller:
         """
         return [agent.act() for agent in self.agents]
 
-    def run_episode(self) -> Tuple[numpy.ndarray, numpy.ndarray, List[float]]:
+    def run_episode(self) -> Tuple[ndarray, List[float], List[float]]:
         """
         Runs a single episode of the game
         :return: A tuple containing: The actions taken by the agents,
