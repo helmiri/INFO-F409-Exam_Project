@@ -46,7 +46,7 @@ class Bush_Mosteller:
         """
         return [agent.act() for agent in self.agents]
 
-    def run_episode(self) -> Tuple[numpy.ndarray, numpy.ndarray, list[float]]:
+    def run_episode(self) -> Tuple[numpy.ndarray, numpy.ndarray, List[float]]:
         """
         Runs a single episode of the game
         :return: A tuple containing: The actions taken by the agents,
