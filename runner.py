@@ -44,6 +44,7 @@ def save_data(data: ndarray, filename: str) -> None:
     """
     zipped = tuple(zip(*data))
     for i, agent_data in enumerate(zipped):
+        filename = filename.replace("\n","")
         with open("data/agent_{0}_{1}.p".format(str(i), filename), "wb") as dest:
             pickle.dump(agent_data, dest)
 
@@ -127,6 +128,7 @@ def main() -> None:
         game = Matrix_Payoffs(get_payoffs_vector(parameters[0], "fear" == parameters[1], "greed" == parameters[1]))
         action_probabilities, aspirations, stimuli = train(game, *floats, *ints)
         filename = "_".join(parameters)
+        filename = filename.replace(".","-")
         save_data(action_probabilities, "act_probs_" + filename)
         save_data(aspirations, "asp_" + filename)
         save_data(stimuli, "stim_" + filename)
