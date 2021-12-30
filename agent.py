@@ -41,8 +41,17 @@ class Agent:
         """
         return np.random.choice([0, 1], p=self.proba)
 
-    def get_aspiration(self):
+    def get_aspiration(self) -> int:
+        """
+        :return: The aspiration of the agent.
+        """
         return self.aspi
 
     def cpt_stimuli(self, payoff, supremun):
+        """
+        Compute the value of the stimuli given the denominator and the payoff value.
+        :param payoff: Value of the payoff for a given action.
+        :param supermun: Value of the denominator in the stimuli formula.
+        :return: The value of the stimuli.
+        """
         return (payoff - self.aspi) / supremun
