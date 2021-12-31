@@ -75,6 +75,19 @@ def compute_average_evolution(by_agent: Tuple) -> ndarray:
     return (out / len(by_agent)) / len(by_agent[0])
 
 
+def compute_propo_coop_mut(by_agent: Tuple) -> ndarray:
+    num_of_mut_coop = numpy.zeros(len(by_agent[0][0]))
+    num_of_no_coop = numpy.zeros(len(by_agent[0][0]))
+    for i in range(len(by_agent[0])): # 1000
+        for j in range(len(by_agent[0][0])): # 100
+            # When prob of action 0 for agents 0 and 1 is bigger than
+            if(by_agent[0][i][j] > 0.9 and by_agent[1][i][j] > 0.9):
+                num_of_mut_coop[j] += 1
+            else:
+                num_of_no_coop[j] += 1
+    return (num_of_mut_coop / num_of_no_coop)
+
+
 def train(game: Matrix_Payoffs, habituation: float, aspiration: float,
           learning_rate: float, nb_repetitions: int, nb_episodes: int) -> Tuple[ndarray, ndarray, ndarray]:
     """
@@ -142,6 +155,7 @@ def main() -> None:
 def plot():
     plt = Plot()
     # For h = 0
+    """
     for aspiration in ["0-5", "2"]:
         avg_coop_by_game = []
         for game_name in ["PD","CH","SG"]: # Habi, Aspi, Learning Rate
@@ -150,14 +164,16 @@ def plot():
             avg_coop_by_game.append(compute_average_evolution((agt0, agt1)))
         plt.plot(avg_coop_by_game, "Proba. of cooperation")
     # For h = 0.2
-    for aspiration in ["2", "3"]:
+    """
+    #for aspiration in ["2", "3"]:
+    for aspiration in ["2"]:
         avg_coop_by_game = []
         for game_name in ["PD","CH","SG"]: # Habi, Aspi, Learning Rate
             agt0 = read_data("data/agent_0_act_probs_"+game_name+"_classic_0-2_"+ aspiration +"_0-5_1000_100.p")
             agt1 = read_data("data/agent_1_act_probs_"+game_name+"_classic_0-2_"+ aspiration +"_0-5_1000_100.p")
-            avg_coop_by_game.append(compute_average_evolution((agt0, agt1)))
+            avg_coop_by_game.append(compute_propo_coop_mut((agt0, agt1)))
         plt.plot(avg_coop_by_game, "Proba. of cooperation")
 
 if __name__ == '__main__':
-    main()
+    #main()
     plot()
