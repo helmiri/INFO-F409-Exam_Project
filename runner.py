@@ -1,12 +1,14 @@
 import os
+import pickle
+import sys
 from typing import Tuple, List
+
 import numpy
 from numpy import ndarray
+
 from agent import Agent
 from matrix_payoffs import Matrix_Payoffs
 from model import Bush_Mosteller
-import pickle
-import sys
 
 
 def get_payoffs_vector(game: str = "PD", fear=False, greed=False) -> List[int]:
@@ -18,12 +20,10 @@ def get_payoffs_vector(game: str = "PD", fear=False, greed=False) -> List[int]:
     :param greed: True to apply a greed modifier. Default: False
     :return: The payoff vector
     """
-
     temptation = 0
     reward = 1
     punishment = 2
     sucker = 3
-
     pd = [4, 3, 1, 0]  # Prisoner's Dilemma: T > R > P > S
     if fear:
         pd[sucker] -= 1
@@ -122,11 +122,11 @@ def main() -> None:
         os.makedirs("data/")
 
     for i, parameters in enumerate(parameters_list):
-        print("- Training: game={0} mode={1} h={2} A={3} l={4} reps={5} eps={6}\n".format(*parameters), end="")
+        print("({0}/{1}) Training: game={2} mode={3} "
+              "h={4} A={5} l={6} reps={7} eps={8}".format(str(i + 1), len(parameters_list), *parameters))
         floats = numpy.asarray(parameters[2:5], dtype=float)
         ints = numpy.asarray(parameters[5:], dtype=int)
-        game = Matrix_Payoffs(get_payoffs_vector(parameters[0], "fear" == parameters[1], "greed" == parameters[1]),
-                              parameters[0])
+        game = Matrix_Payoffs(get_payoffs_vector(parameters[0], "fear" == parameters[1], "greed" == parameters[1]))
         action_probabilities, aspirations, stimuli = train(game, *floats, *ints)
         filename = "_".join(parameters)
         filename = filename.replace(".", "-")
