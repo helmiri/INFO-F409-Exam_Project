@@ -9,6 +9,7 @@ from numpy import ndarray
 from agent import Agent
 from matrix_payoffs import Matrix_Payoffs
 from model import Bush_Mosteller
+from plot import Plot
 
 
 def get_payoffs_vector(game: str = "PD", fear=False, greed=False) -> List[int]:
@@ -135,5 +136,25 @@ def main() -> None:
         save_data(stimuli, "stim_" + filename)
 
 
+def plot():
+    plt = Plot()
+    # For h = 0
+    for aspiration in ["0.5"]:
+        avg_coop_by_game = []
+        for game_name in ["CH","PD","SG"]: # Habi, Aspi, Learning Rate
+            agt0 = read_data("data/agent_0_act_probs_"+game_name+"_classic_0_0-5_0-5_1000_100.p")
+            agt1 = read_data("data/agent_1_act_probs_"+game_name+"_classic_0_0-5_0-5_1000_100.p")
+            avg_coop_by_game.append(compute_average_evolution((agt0, agt1)))
+        plt.plot(avg_coop_by_game)
+    # For h = 0.2
+    for aspiration in ["0-5", "2", "3"]:
+        avg_coop_by_game = []
+        for game_name in ["CH","PD","SG"]: # Habi, Aspi, Learning Rate
+            agt0 = read_data("data/agent_0_act_probs_"+game_name+"_classic_0_"+ aspiration +"_0-5_1000_100.p")
+            agt1 = read_data("data/agent_1_act_probs_"+game_name+"_classic_0_"+ aspiration +"_0-5_1000_100.p")
+            avg_coop_by_game.append(compute_average_evolution((agt0, agt1)))
+        plt.plot(avg_coop_by_game)
+
 if __name__ == '__main__':
+    #plot()
     main()
