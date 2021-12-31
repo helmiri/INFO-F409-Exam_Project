@@ -22,7 +22,7 @@ class Agent:
             newprob = self.proba[act] + self.proba[act] * self.leara * stimu
         self.proba[act] = newprob
         self.proba[1 - act] = 1 - newprob
-        return self.proba
+        return self.proba[0]
 
     def updt_aspi(self, payoff: int):
         """
