@@ -9,7 +9,7 @@ class Plot:
         np.set_printoptions(threshold=sys.maxsize) #allows to print the whole array in the terminal
         plt.rc("font", **{"size" : 7}) #change the general font size
 
-    def plot(self, data):
+    def plot(self, data, parameters_name):
         """
         General function to plot our data.
 
@@ -20,7 +20,7 @@ class Plot:
             plt.subplot(3, 1, game+1)
             plt.ylim(0, 1.1)
             plt.title(games[game], fontweight='bold')
-            plt.ylabel("Cooperation rate")
+            plt.ylabel(parameters_name)
             plt.xlabel("Iterations")
             plt.plot(data[game])
         plt.tight_layout()

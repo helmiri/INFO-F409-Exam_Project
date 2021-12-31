@@ -17,7 +17,7 @@ class Bush_Mosteller:
         self.agents = agents
         self.game = game
         self.payoffs = game.get_payoffs_vector()
-        self.action_probabilities, self.aspirations, self.stimuli = None, None, None
+        self.action_probabilities, self.action, self.aspirations, self.stimuli = None, None, None, None
 
     def update_agent_aspirations(self, rewards: Tuple[int]) -> List[float]:
         """
@@ -60,18 +60,20 @@ class Bush_Mosteller:
         aspirations = self.update_agent_aspirations(payoffs)
 
         action_probabilities = numpy.zeros(len(self.agents), dtype=numpy.float64)
+        action = numpy.zeros(len(self.agents), dtype=numpy.float64)
         for i, agent in enumerate(self.agents):
             action_probabilities[i] = agent.learn(stimuli[i], actions[i])
+            action[i] = actions[i]
 
-        return action_probabilities, stimuli, aspirations
+        return action_probabilities, stimuli, aspirations, action
 
     def run(self, nb_runs: int) -> None:
         self.aspirations = numpy.empty(nb_runs, dtype=object)
         self.action_probabilities = numpy.empty(nb_runs, dtype=object)
         self.stimuli = numpy.empty(nb_runs, dtype=object)
-
+        self.action = numpy.empty(nb_runs, dtype=object)
         for i in range(nb_runs):
-            self.action_probabilities[i], self.stimuli[i], self.aspirations[i] = self.run_episode()
+            self.action_probabilities[i], self.stimuli[i], self.aspirations[i], self.action[i] = self.run_episode()
 
     def get_aspirations(self) -> Tuple[Tuple[float]]:
         """
@@ -91,3 +93,6 @@ class Bush_Mosteller:
         :return: Tuple containing tuples where the ith tuple contains all the stimuli of agent i during training
         """
         return tuple(zip(*self.stimuli))
+
+    def get_action(self) -> Tuple[Tuple[float]]:
+        return tuple(zip(*self.action))

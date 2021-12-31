@@ -6,13 +6,12 @@ R = 1
 P = 2
 S = 3
 
-
 class Matrix_Payoffs:
     def __init__(self, payoffs):
         self.num_agents = 2
         self.vector = payoffs
-        self.matrix = [[[payoffs[R]] * 2, (payoffs[S], payoffs[T])],
-                       [(payoffs[T], payoffs[S]), [payoffs[P]] * 2]]
+        self.matrix = [[[payoffs[R]] * 2, [payoffs[S], payoffs[T]]],
+                       [[payoffs[T], payoffs[S]], [payoffs[P]] * 2]]
 
     def get_payoff(self, actions: List[int]) -> Tuple[int]:
         """

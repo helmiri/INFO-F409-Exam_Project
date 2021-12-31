@@ -26,14 +26,14 @@ def get_payoffs_vector(game: str = "PD", fear=False, greed=False) -> List[int]:
     punishment = 2
     sucker = 3
     pd = [4, 3, 1, 0]  # Prisoner's Dilemma: T > R > P > S
+    if game == "SG":
+        pd = [4, 3, 0, 1]  # Stag Hunt: R > T > P > S
+    elif game == "CH":
+        pd = [3, 4, 1, 0]   # Chicken: T > R > S > P
     if fear:
         pd[sucker] -= 1
     elif greed:
         pd[reward] += 1
-    if game == "SH":
-        pd[temptation], pd[reward] = pd[reward], pd[temptation]  # Stag Hunt: R > T > P > S
-    elif game == "CH":
-        pd[punishment], pd[sucker] = pd[sucker], pd[temptation]  # Chicken: T > R > S > P
     return pd
 
 
@@ -91,6 +91,7 @@ def train(game: Matrix_Payoffs, habituation: float, aspiration: float,
     action_probabilities = numpy.empty(nb_repetitions, dtype=object)
     aspirations = numpy.empty(nb_repetitions, dtype=object)
     stimuli = numpy.empty(nb_repetitions, dtype=object)
+    action = numpy.empty(nb_repetitions, dtype=object)
     for repetition in range(nb_repetitions):
         agents = [Agent(learning_rate, aspiration, habituation) for _ in range(game.num_agents)]
         model = Bush_Mosteller(agents, game)
@@ -99,7 +100,8 @@ def train(game: Matrix_Payoffs, habituation: float, aspiration: float,
         action_probabilities[repetition] = model.get_action_probabilities()
         aspirations[repetition] = model.get_aspirations()
         stimuli[repetition] = model.get_stimuli_agent()
-    return action_probabilities, aspirations, stimuli
+        action[repetition] = model.get_action()
+    return action_probabilities, aspirations, stimuli, action
 
 
 def main() -> None:
@@ -128,33 +130,34 @@ def main() -> None:
         floats = numpy.asarray(parameters[2:5], dtype=float)
         ints = numpy.asarray(parameters[5:], dtype=int)
         game = Matrix_Payoffs(get_payoffs_vector(parameters[0], "fear" == parameters[1], "greed" == parameters[1]))
-        action_probabilities, aspirations, stimuli = train(game, *floats, *ints)
+        action_probabilities, aspirations, stimuli, action = train(game, *floats, *ints)
         filename = "_".join(parameters)
         filename = filename.replace(".", "-")
         save_data(action_probabilities, "act_probs_" + filename)
         save_data(aspirations, "asp_" + filename)
         save_data(stimuli, "stim_" + filename)
+        save_data(action, "actions_" + filename)
 
 
 def plot():
     plt = Plot()
     # For h = 0
-    for aspiration in ["0.5"]:
+    for aspiration in ["0-5", "2"]:
         avg_coop_by_game = []
-        for game_name in ["CH","PD","SG"]: # Habi, Aspi, Learning Rate
-            agt0 = read_data("data/agent_0_act_probs_"+game_name+"_classic_0_0-5_0-5_1000_100.p")
-            agt1 = read_data("data/agent_1_act_probs_"+game_name+"_classic_0_0-5_0-5_1000_100.p")
-            avg_coop_by_game.append(compute_average_evolution((agt0, agt1)))
-        plt.plot(avg_coop_by_game)
-    # For h = 0.2
-    for aspiration in ["0-5", "2", "3"]:
-        avg_coop_by_game = []
-        for game_name in ["CH","PD","SG"]: # Habi, Aspi, Learning Rate
+        for game_name in ["PD","CH","SG"]: # Habi, Aspi, Learning Rate
             agt0 = read_data("data/agent_0_act_probs_"+game_name+"_classic_0_"+ aspiration +"_0-5_1000_100.p")
             agt1 = read_data("data/agent_1_act_probs_"+game_name+"_classic_0_"+ aspiration +"_0-5_1000_100.p")
             avg_coop_by_game.append(compute_average_evolution((agt0, agt1)))
-        plt.plot(avg_coop_by_game)
+        plt.plot(avg_coop_by_game, "Proba. of cooperation")
+    # For h = 0.2
+    for aspiration in ["2", "3"]:
+        avg_coop_by_game = []
+        for game_name in ["PD","CH","SG"]: # Habi, Aspi, Learning Rate
+            agt0 = read_data("data/agent_0_act_probs_"+game_name+"_classic_0-2_"+ aspiration +"_0-5_1000_100.p")
+            agt1 = read_data("data/agent_1_act_probs_"+game_name+"_classic_0-2_"+ aspiration +"_0-5_1000_100.p")
+            avg_coop_by_game.append(compute_average_evolution((agt0, agt1)))
+        plt.plot(avg_coop_by_game, "Proba. of cooperation")
 
 if __name__ == '__main__':
-    #plot()
     main()
+    plot()
