@@ -85,7 +85,7 @@ def compute_propo_coop_mut(by_agent: Tuple) -> ndarray:
                 num_of_mut_coop[j] += 1
             else:
                 num_of_no_coop[j] += 1
-    return (num_of_mut_coop / num_of_no_coop)
+    return (num_of_mut_coop / len(by_agent[0]))
 
 
 def train(game: Matrix_Payoffs, habituation: float, aspiration: float,
@@ -160,7 +160,7 @@ def plot():
         for game_name in ["PD","CH","SG"]: # Habi, Aspi, Learning Rate
             agt0 = read_data("data/agent_0_act_probs_"+game_name+"_classic_0_"+ aspiration +"_0-5_1000_100.p")
             agt1 = read_data("data/agent_1_act_probs_"+game_name+"_classic_0_"+ aspiration +"_0-5_1000_100.p")
-            avg_coop_by_game.append(compute_average_evolution((agt0, agt1)))
+            avg_coop_by_game.append(compute_propo_coop_mut((agt0, agt1)))
         plt.plot(avg_coop_by_game, "Proba. of cooperation")
     # For h = 0.2
     for aspiration in ["2", "3"]:
