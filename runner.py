@@ -155,7 +155,6 @@ def main() -> None:
 def plot():
     plt = Plot()
     # For h = 0
-    """
     for aspiration in ["0-5", "2"]:
         avg_coop_by_game = []
         for game_name in ["PD","CH","SG"]: # Habi, Aspi, Learning Rate
@@ -164,9 +163,7 @@ def plot():
             avg_coop_by_game.append(compute_average_evolution((agt0, agt1)))
         plt.plot(avg_coop_by_game, "Proba. of cooperation")
     # For h = 0.2
-    """
-    #for aspiration in ["2", "3"]:
-    for aspiration in ["2"]:
+    for aspiration in ["2", "3"]:
         avg_coop_by_game = []
         for game_name in ["PD","CH","SG"]: # Habi, Aspi, Learning Rate
             agt0 = read_data("data/agent_0_act_probs_"+game_name+"_classic_0-2_"+ aspiration +"_0-5_1000_100.p")
