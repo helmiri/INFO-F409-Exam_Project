@@ -11,7 +11,7 @@ matplotlib
 ## Run
 This project can be executed as follows :
 ```
-python runner.py [game] [mode] habituation aspiration learning_rate nb_repetitions nb_episodes
+python runner.py [mode] habituation aspiration learning_rate nb_repetitions nb_episodes
 ```
 or
 ```
@@ -19,10 +19,6 @@ python runner.py source_file
 ```
 where:
 ```
-- game:
-    - PD: Prisoner's Dilemma
-    - SG: Stag Hunt
-    - CH: Chicken
 - mode:
     - classic
     - fear
@@ -34,7 +30,10 @@ where:
 The results of each agent's training will be saved in the ```data/``` folder. The filename follows the format:
 ```
 agent_[num]_[data type]_[game]_[mode]_[h]_[A]_[l]_[nb_reps]_[nb_eps].p
-
+    - game:
+        - PD: Prisoner's Dilemma
+        - SG: Stag Hunt
+        - CH: Chicken
     - num: 0-n agents
     - data type:
         - asp: aspirations at each timestep for every repetition
