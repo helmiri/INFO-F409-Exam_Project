@@ -185,13 +185,13 @@ def plot():
             parameters_list.append(line.split(" "))
     plt = Plot()
     # For h = 0
-    mode = str(sys.argv[1])
-    mode = mode.replace(".", "-")
+    mode = sys.argv[1]
     habituation = str(sys.argv[2])
     habituation = habituation.replace(".", "-")
     aspiration = str(sys.argv[3])
     aspiration = aspiration.replace(".", "-")
-    learning_rate = sys.argv[4]
+    learning_rate = str(sys.argv[4])
+    learning_rate = learning_rate.replace(".", "-")
     nb_repetitions = sys.argv[5]
     nb_episodes = sys.argv[6]
     coop_by_game = []
