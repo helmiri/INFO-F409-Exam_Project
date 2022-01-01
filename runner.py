@@ -113,7 +113,7 @@ def train(game: Matrix_Payoffs, habituation: float, aspiration: float,
 
 def main() -> List[List[str]]:
     parameters_list = list()
-    if len(sys.argv) == 8:
+    if len(sys.argv) == 7:
         parameters_list.append(sys.argv[1:])
     elif len(sys.argv) == 2:
         with open(sys.argv[1], "r") as parameters_file:
@@ -123,8 +123,7 @@ def main() -> List[List[str]]:
     else:
         print("Invalid arguments")
         print("Usage: python runner.py [game] [mode] habituation aspiration learning_rate nb_repetitions "
-              "nb_episodes\n\tOR\n       python runner.py source_file\n\t- game:\n\t\t- PD: Prisoner's Dilemma\n\t\t- "
-              "SG: Stag Hunt\n\t\t- CH: Chicken\n\t- mode:\n\t\t- classic\n\t\t- fear\n\t\t- greed\t\n\t- "
+              "nb_episodes\n\tOR\n       python runner.py source_file\n\t- mode:\n\t\t- classic\n\t\t- fear\n\t\t- greed\t\n\t- "
               "source_file: File where each line contains a set of arguments")
         return []
 
@@ -132,13 +131,41 @@ def main() -> List[List[str]]:
         os.makedirs("data/")
 
     for i, parameters in enumerate(parameters_list):
-        print("({0}/{1}) Training: game={2} mode={3} "
-              "h={4} A={5} l={6} reps={7} eps={8}".format(str(i + 1), len(parameters_list), *parameters))
-        floats = numpy.asarray(parameters[2:5], dtype=float)
-        ints = numpy.asarray(parameters[5:], dtype=int)
-        game = Matrix_Payoffs(get_payoffs_vector(parameters[0], "fear" == parameters[1], "greed" == parameters[1]))
+        print("({0}/{1}) Training: game=PD mode={2} "
+              "h={3} A={4} l={5} reps={6} eps={7}".format(str(i + 1), len(parameters_list), *parameters))
+        floats = numpy.asarray(parameters[1:4], dtype=float)
+        ints = numpy.asarray(parameters[4:], dtype=int)
+        game = Matrix_Payoffs(get_payoffs_vector("PD", "fear" == parameters[1], "greed" == parameters[1]))
         action_probabilities, aspirations, stimuli, action = train(game, *floats, *ints)
-        filename = "_".join(parameters)
+        filename = "PD_"+"_".join(parameters)
+        filename = filename.replace(".", "-")
+        save_data(action_probabilities, "act_probs_" + filename)
+        save_data(aspirations, "asp_" + filename)
+        save_data(stimuli, "stim_" + filename)
+        save_data(action, "actions_" + filename)
+
+    for i, parameters in enumerate(parameters_list):
+        print("({0}/{1}) Training: game=SG mode={2} "
+              "h={3} A={4} l={5} reps={6} eps={7}".format(str(i + 1), len(parameters_list), *parameters))
+        floats = numpy.asarray(parameters[1:4], dtype=float)
+        ints = numpy.asarray(parameters[4:], dtype=int)
+        game = Matrix_Payoffs(get_payoffs_vector("SG", "fear" == parameters[1], "greed" == parameters[1]))
+        action_probabilities, aspirations, stimuli, action = train(game, *floats, *ints)
+        filename = "SG_"+"_".join(parameters)
+        filename = filename.replace(".", "-")
+        save_data(action_probabilities, "act_probs_" + filename)
+        save_data(aspirations, "asp_" + filename)
+        save_data(stimuli, "stim_" + filename)
+        save_data(action, "actions_" + filename)
+
+    for i, parameters in enumerate(parameters_list):
+        print("({0}/{1}) Training: game=CH mode={2} "
+              "h={3} A={4} l={5} reps={6} eps={7}".format(str(i + 1), len(parameters_list), *parameters))
+        floats = numpy.asarray(parameters[1:4], dtype=float)
+        ints = numpy.asarray(parameters[4:], dtype=int)
+        game = Matrix_Payoffs(get_payoffs_vector("CH", "fear" == parameters[1], "greed" == parameters[1]))
+        action_probabilities, aspirations, stimuli, action = train(game, *floats, *ints)
+        filename = "CH_"+"_".join(parameters)
         filename = filename.replace(".", "-")
         save_data(action_probabilities, "act_probs_" + filename)
         save_data(aspirations, "asp_" + filename)
@@ -158,16 +185,25 @@ def plot():
             parameters_list.append(line.split(" "))
     plt = Plot()
     # For h = 0
-    for aspiration in ["0-5", "2"]:
-        coop_by_game = []
-        for game_name in ["PD", "SG", "CH"]:
-            agt0 = read_data("data/agent_0_act_probs_" + game_name + "_classic_0_" + aspiration + "_0-5_1000_250.p")
-            for repetition in agt0:
-                if repetition[100] > 0.99:
-                    coop_by_game.append(repetition)
-                    break
-            print(game_name + " convergence rate: " + str(compute_propo_coop_mut(agt0)))
-        plt.plot(coop_by_game, "Proba. of cooperation")
+    mode = str(sys.argv[1])
+    mode = mode.replace(".", "-")
+    habituation = str(sys.argv[2])
+    habituation = habituation.replace(".", "-")
+    aspiration = str(sys.argv[3])
+    aspiration = aspiration.replace(".", "-")
+    learning_rate = sys.argv[4]
+    nb_repetitions = sys.argv[5]
+    nb_episodes = sys.argv[6]
+    coop_by_game = []
+    for game_name in ["PD", "SG", "CH"]:
+        agt0 = read_data("data/agent_0_act_probs_" + game_name + "_" + mode + "_" + habituation + "_"
+                         + aspiration + "_" + learning_rate + "_" + nb_repetitions + "_" + nb_episodes + ".p")
+        for repetition in agt0:
+            if repetition[100] > 0.99:
+                coop_by_game.append(repetition)
+                break
+        print(game_name + " convergence rate: " + str(compute_propo_coop_mut(agt0)))
+    plt.plot(coop_by_game, "Proba. of cooperation")
 
 
 if __name__ == '__main__':
