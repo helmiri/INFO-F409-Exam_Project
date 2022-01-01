@@ -1,7 +1,7 @@
 import sys
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class Plot:
@@ -19,6 +19,7 @@ class Plot:
         for game in range(len(data)):
             plt.subplot(3, 1, game+1)
             plt.ylim(0, 1.1)
+            plt.xlim(0, 100)
             plt.title(games[game], fontweight='bold')
             plt.ylabel(parameters_name)
             plt.xlabel("Iterations")

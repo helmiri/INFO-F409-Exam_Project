@@ -26,14 +26,14 @@ def get_payoffs_vector(game: str = "PD", fear=False, greed=False) -> List[int]:
     punishment = 2
     sucker = 3
     pd = [4, 3, 1, 0]  # Prisoner's Dilemma: T > R > P > S
-    if game == "SG":
-        pd = [4, 3, 0, 1]  # Stag Hunt: R > T > P > S
-    elif game == "CH":
-        pd = [3, 4, 1, 0]   # Chicken: T > R > S > P
     if fear:
         pd[sucker] -= 1
     elif greed:
         pd[reward] += 1
+    if game == "SG":
+        pd = [3, 4, 1, 0]  # Stag Hunt: R > T > P > S
+    elif game == "CH":
+        pd = [4, 3, 0, 1]  # Chicken: T > R > S > P
     return pd
 
 
@@ -75,21 +75,15 @@ def compute_average_evolution(by_agent: Tuple) -> ndarray:
     return (out / len(by_agent)) / len(by_agent[0])
 
 
-def compute_propo_coop_mut(by_agent: Tuple) -> ndarray:
-    num_of_mut_coop = numpy.zeros(len(by_agent[0][0]))
-    num_of_no_coop = numpy.zeros(len(by_agent[0][0]))
-    for i in range(len(by_agent[0])): # 1000
-        for j in range(len(by_agent[0][0])): # 100
-            # When prob of action 0 for agents 0 and 1 is bigger than
-            if(by_agent[0][i][j] > 0.9 and by_agent[1][i][j] > 0.9):
-                num_of_mut_coop[j] += 1
-            else:
-                num_of_no_coop[j] += 1
-    return (num_of_mut_coop / len(by_agent[0]))
+def compute_propo_coop_mut(agent: Tuple) -> float:
+    count = 0
+    for repetition in agent:
+        count += 1 if repetition[100] > 0.99 else 0
+    return count / len(agent)
 
 
 def train(game: Matrix_Payoffs, habituation: float, aspiration: float,
-          learning_rate: float, nb_repetitions: int, nb_episodes: int) -> Tuple[ndarray, ndarray, ndarray]:
+          learning_rate: float, nb_repetitions: int, nb_episodes: int) -> Tuple[ndarray, ndarray, ndarray, ndarray]:
     """
     Trains a set of agents on the given game
     :param game: The payoff matrix
@@ -117,7 +111,7 @@ def train(game: Matrix_Payoffs, habituation: float, aspiration: float,
     return action_probabilities, aspirations, stimuli, action
 
 
-def main() -> None:
+def main() -> List[List[str]]:
     parameters_list = list()
     if len(sys.argv) == 8:
         parameters_list.append(sys.argv[1:])
@@ -132,7 +126,7 @@ def main() -> None:
               "nb_episodes\n\tOR\n       python runner.py source_file\n\t- game:\n\t\t- PD: Prisoner's Dilemma\n\t\t- "
               "SG: Stag Hunt\n\t\t- CH: Chicken\n\t- mode:\n\t\t- classic\n\t\t- fear\n\t\t- greed\t\n\t- "
               "source_file: File where each line contains a set of arguments")
-        return
+        return []
 
     if not os.path.exists("data/"):
         os.makedirs("data/")
@@ -150,27 +144,32 @@ def main() -> None:
         save_data(aspirations, "asp_" + filename)
         save_data(stimuli, "stim_" + filename)
         save_data(action, "actions_" + filename)
+    return parameters_list
 
 
 def plot():
+    parameters_list = list()
+    if len(sys.argv) == 8:
+        parameters_list.append(sys.argv[1:])
+    elif len(sys.argv) == 2:
+        with open(sys.argv[1], "r") as parameters_file:
+            lines = parameters_file.readlines()
+        for line in lines:
+            parameters_list.append(line.split(" "))
     plt = Plot()
     # For h = 0
     for aspiration in ["0-5", "2"]:
-        avg_coop_by_game = []
-        for game_name in ["PD","CH","SG"]: # Habi, Aspi, Learning Rate
-            agt0 = read_data("data/agent_0_act_probs_"+game_name+"_classic_0_"+ aspiration +"_0-5_1000_100.p")
-            agt1 = read_data("data/agent_1_act_probs_"+game_name+"_classic_0_"+ aspiration +"_0-5_1000_100.p")
-            avg_coop_by_game.append(compute_propo_coop_mut((agt0, agt1)))
-        plt.plot(avg_coop_by_game, "Proba. of cooperation")
-    # For h = 0.2
-    for aspiration in ["2", "3"]:
-        avg_coop_by_game = []
-        for game_name in ["PD","CH","SG"]: # Habi, Aspi, Learning Rate
-            agt0 = read_data("data/agent_0_act_probs_"+game_name+"_classic_0-2_"+ aspiration +"_0-5_1000_100.p")
-            agt1 = read_data("data/agent_1_act_probs_"+game_name+"_classic_0-2_"+ aspiration +"_0-5_1000_100.p")
-            avg_coop_by_game.append(compute_propo_coop_mut((agt0, agt1)))
-        plt.plot(avg_coop_by_game, "Proba. of cooperation")
+        coop_by_game = []
+        for game_name in ["PD", "SG", "CH"]:
+            agt0 = read_data("data/agent_0_act_probs_" + game_name + "_classic_0_" + aspiration + "_0-5_1000_250.p")
+            for repetition in agt0:
+                if repetition[100] > 0.99:
+                    coop_by_game.append(repetition)
+                    break
+            print(game_name + " convergence rate: " + str(compute_propo_coop_mut(agt0)))
+        plt.plot(coop_by_game, "Proba. of cooperation")
+
 
 if __name__ == '__main__':
-    #main()
+    main()
     plot()
