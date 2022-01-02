@@ -27,7 +27,7 @@ def get_payoffs_vector(game: str = "PD", fear=False, greed=False) -> List[int]:
     sucker = 3
     pd = [4, 3, 1, 0]  # Prisoner's Dilemma: T > R > P > S
     if fear:
-        pd[sucker] -= 1
+        pd[sucker] = -1
     elif greed:
         pd[reward] += 1
     if game == "SG":
@@ -78,7 +78,7 @@ def compute_average_evolution(by_agent: Tuple) -> ndarray:
 def compute_propo_coop_mut(agent: Tuple) -> float:
     count = 0
     for repetition in agent:
-        count += 1 if repetition[100] > 0.99 else 0
+        count += 1 if repetition[99] > 0.99 else 0
     return count / len(agent)
 
 
@@ -199,7 +199,7 @@ def plot():
         agt0 = read_data("data/agent_0_act_probs_" + game_name + "_" + mode + "_" + habituation + "_"
                          + aspiration + "_" + learning_rate + "_" + nb_repetitions + "_" + nb_episodes + ".p")
         for repetition in agt0:
-            if repetition[100] > 0.99:
+            if repetition[99] > 0.99:
                 coop_by_game.append(repetition)
                 break
         print(game_name + " convergence rate: " + str(compute_propo_coop_mut(agt0)))
