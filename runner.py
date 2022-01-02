@@ -122,7 +122,7 @@ def main() -> List[List[str]]:
             parameters_list.append(line.split(" "))
     else:
         print("Invalid arguments")
-        print("Usage: python runner.py [game] [mode] habituation aspiration learning_rate nb_repetitions "
+        print("Usage: python runner.py [mode] habituation aspiration learning_rate nb_repetitions "
               "nb_episodes\n\tOR\n       python runner.py source_file\n\t- mode:\n\t\t- classic\n\t\t- fear\n\t\t- greed\t\n\t- "
               "source_file: File where each line contains a set of arguments")
         return []
