@@ -144,7 +144,6 @@ def main() -> List[List[str]]:
             action_probabilities, aspirations, stimuli, action = train(game, *floats, *ints)
             filename = game_name + "_" + "_".join(parameters)
             filename = filename.replace(".", "-")
-            print(filename)
             save_data(action_probabilities, "act_probs_" + filename)
             save_data(aspirations, "asp_" + filename)
             save_data(stimuli, "stim_" + filename)
@@ -166,16 +165,13 @@ def plot():
             parameters_list.append(line.split(" "))
     plt = Plot()
     mode = sys.argv[1]
-    habituation = str(sys.argv[2])
-    habituation = habituation.replace(".", "-")
-    aspiration = str(sys.argv[3])
-    aspiration = aspiration.replace(".", "-")
-    learning_rate = str(sys.argv[4])
-    learning_rate = learning_rate.replace(".", "-")
+    habituation = str(sys.argv[2]).replace(".", "-")
+    aspiration = str(sys.argv[3]).replace(".", "-")
+    learning_rate = str(sys.argv[4]).replace(".", "-")
     nb_repetitions = sys.argv[5]
     nb_episodes = sys.argv[6]
     coop_by_game = []
-    for game_name in ["PD", "SG", "CH"]:
+    for game_name in ["PD", "CH", "SG"]:
         agt = read_data("data/agent_act_probs_" + game_name + "_" + mode + "_" + habituation + "_"
                      + aspiration + "_" + learning_rate + "_" + nb_repetitions + "_" + nb_episodes + ".p")
         coop_by_game.append(agt[0])
