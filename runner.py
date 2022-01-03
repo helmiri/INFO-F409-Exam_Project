@@ -78,7 +78,7 @@ def compute_average_evolution(by_agent: Tuple) -> ndarray:
 def compute_propo_coop_mut(agent: Tuple) -> float:
     count = 0
     for repetition in agent:
-        count += 1 if repetition[100] > 0.99 else 0
+        count += 1 if repetition[99] > 0.99 else 0
     return count / len(agent)
 
 
@@ -144,6 +144,7 @@ def main() -> List[List[str]]:
             action_probabilities, aspirations, stimuli, action = train(game, *floats, *ints)
             filename = game_name + "_" + "_".join(parameters)
             filename = filename.replace(".", "-")
+            print(filename)
             save_data(action_probabilities, "act_probs_" + filename)
             save_data(aspirations, "asp_" + filename)
             save_data(stimuli, "stim_" + filename)
@@ -153,7 +154,7 @@ def main() -> List[List[str]]:
 
 def plot():
     parameters_list = list()
-    if len(sys.argv) == 8:
+    if len(sys.argv) == 7:
         for i in range(len(sys.argv[1:])):
             sys.argv[i] = sys.argv[i].replace(".", "-")
         parameters_list.append(sys.argv[:])
@@ -164,13 +165,22 @@ def plot():
             line = line.replace(".", "-").strip("\n")
             parameters_list.append(line.split(" "))
     plt = Plot()
+    mode = sys.argv[1]
+    habituation = str(sys.argv[2])
+    habituation = habituation.replace(".", "-")
+    aspiration = str(sys.argv[3])
+    aspiration = aspiration.replace(".", "-")
+    learning_rate = str(sys.argv[4])
+    learning_rate = learning_rate.replace(".", "-")
+    nb_repetitions = sys.argv[5]
+    nb_episodes = sys.argv[6]
     coop_by_game = []
-    for parameters in parameters_list:
-        for game_name in ["PD", "SG", "CH"]:
-            agt = read_data("data/agent_act_probs_{0}_{1}_{2}_{3}_{4}_{5}_{6}.p".format(game_name, *parameters))
-            coop_by_game.append(agt[0])
-            print(game_name + " convergence rate: " + str(compute_propo_coop_mut(agt)))
-        plt.plot(coop_by_game, "Proba. of cooperation")
+    for game_name in ["PD", "SG", "CH"]:
+        agt = read_data("data/agent_act_probs_" + game_name + "_" + mode + "_" + habituation + "_"
+                     + aspiration + "_" + learning_rate + "_" + nb_repetitions + "_" + nb_episodes + ".p")
+        coop_by_game.append(agt[0])
+        print(game_name + " convergence rate: " + str(compute_propo_coop_mut(agt)))
+    plt.plot(coop_by_game, "Proba. of cooperation")
 
 
 if __name__ == '__main__':
