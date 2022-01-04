@@ -9,7 +9,6 @@ from numpy import ndarray
 from agent import Agent
 from matrix_payoffs import Matrix_Payoffs
 from model import Bush_Mosteller
-from plot import Plot
 
 
 def get_payoffs_vector(game: str = "PD", fear=False, greed=False) -> List[int]:
@@ -120,9 +119,6 @@ def main() -> List[List[str]]:
             lines = parameters_file.readlines()
         for line in lines:
             parameters_list.append(line.split(" "))
-    elif len(sys.argv) == 3:
-        plot()
-        return []
     else:
         print("Invalid arguments")
         print("Usage: python runner.py [mode] habituation aspiration learning_rate nb_repetitions "
@@ -133,11 +129,13 @@ def main() -> List[List[str]]:
     if not os.path.exists("data/"):
         os.makedirs("data/")
 
+    count = 0
     for i, parameters in enumerate(parameters_list):
         for j, game_name in enumerate(["PD", "SG", "CH"]):
+            count += 1
             print("({0}/{1}) Training: game={2} mode={3} "
-                  "h={4} A={5} l={6} reps={7} eps={8}".format(str((i + 1) * (j + 1)), len(parameters_list) * 3,
-                                                              game_name, *parameters))
+                  "h={4} A={5} l={6} reps={7} eps={8}".format(str(count), len(parameters_list) * 3, game_name,
+                                                              *parameters))
             floats = numpy.asarray(parameters[1:4], dtype=float)
             ints = numpy.asarray(parameters[4:], dtype=int)
             game = Matrix_Payoffs(get_payoffs_vector(game_name, "fear" == parameters[1], "greed" == parameters[1]))
@@ -151,34 +149,5 @@ def main() -> List[List[str]]:
     return parameters_list
 
 
-def plot():
-    parameters_list = list()
-    if len(sys.argv) == 7:
-        for i in range(len(sys.argv[1:])):
-            sys.argv[i] = sys.argv[i].replace(".", "-")
-        parameters_list.append(sys.argv[:])
-    elif len(sys.argv) == 2:
-        with open(sys.argv[1], "r") as parameters_file:
-            lines = parameters_file.readlines()
-        for line in lines:
-            line = line.replace(".", "-").strip("\n")
-            parameters_list.append(line.split(" "))
-    plt = Plot()
-    mode = sys.argv[1]
-    habituation = str(sys.argv[2]).replace(".", "-")
-    aspiration = str(sys.argv[3]).replace(".", "-")
-    learning_rate = str(sys.argv[4]).replace(".", "-")
-    nb_repetitions = sys.argv[5]
-    nb_episodes = sys.argv[6]
-    coop_by_game = []
-    for game_name in ["PD", "CH", "SG"]:
-        agt = read_data("data/agent_act_probs_" + game_name + "_" + mode + "_" + habituation + "_"
-                     + aspiration + "_" + learning_rate + "_" + nb_repetitions + "_" + nb_episodes + ".p")
-        coop_by_game.append(agt[0])
-        print(game_name + " convergence rate: " + str(compute_propo_coop_mut(agt)))
-    plt.plot(coop_by_game, "Proba. of cooperation")
-
-
 if __name__ == '__main__':
     main()
-    plot()
