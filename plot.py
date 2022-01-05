@@ -73,6 +73,9 @@ def main():
             agt = read_data("data/agent_act_probs_{0}_{1}_{2}_{3}_{4}_{5}_{6}.p".format(game_name, *parameters))
             coop_by_game.append(agt[10])
             print(game_name + " convergence rate: " + str(compute_propo_coop_mut(agt)))
+        print("PD : ", sum(coop_by_game[0])/len(coop_by_game[0]))
+        print("SG : ", sum(coop_by_game[1])/len(coop_by_game[1]))
+        print("CH : ", sum(coop_by_game[2])/len(coop_by_game[2]))
         plot.plot_cooperation(coop_by_game, "Proba. of cooperation")
         coop_by_game.clear()
 
@@ -108,4 +111,4 @@ def mainSRE():
 
 
 if __name__ == '__main__':
-    mainSRE()
+    main()
