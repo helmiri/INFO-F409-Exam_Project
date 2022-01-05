@@ -29,7 +29,7 @@ class Plot:
         plt.tight_layout()
         plt.show()
 
-    def plot_SRE_over_A0(self, data):
+    def plot_SRE_over_A0(self, coop_PD, coop_CH, coop_SG):
         """
         Plot for the impact of the aspiration level on the SRE rate and
         a second plot with greed and fear.
@@ -37,30 +37,19 @@ class Plot:
         :param dta: The data to plot.
         """
         games = ["Prisoner's Dilemma", "Chicken", "Stag Hunt"]
-        x = np.linspace(0, 4, 40)
-        for game in range(len(data)):
-            plt.subplot(3, 1, game + 1)
+        x = np.linspace(0, 4, 41)
+        for i in range(3):
+            plt.subplot(3, 1, i + 1)
             plt.ylim(0, 1.1)
-            plt.title(games[game], fontweight='bold')
+            plt.title(games[i], fontweight='bold')
             plt.ylabel("SRE rate")
             plt.xlabel("A0")
-            plt.plot(x, data[game][0])
-        plt.tight_layout()
-        plt.show()
-
-        # Greed and fear plot
-        for game in range(len(data)):
-            plt.subplot(3, 1, game + 1)
-            plt.ylim(0, 1.1)
-            plt.plot(x, data[game][0], color='black', linestyle='dashed', label='classic', alpha=0.6)
-            if game != 1:
-                plt.plot(x, data[game][1], color='blue', label='fear', alpha=0.6)
-            if game != 2:
-                plt.plot(x, data[game][2], color='red', label='greed', alpha=0.6)
-            plt.title(games[game], fontweight='bold')
-            plt.ylabel("SRE rate")
-            plt.xlabel("A0")
-            plt.legend()
+            if i == 0:
+                plt.plot(x, coop_PD)
+            elif i == 1:
+                plt.plot(x, coop_CH)
+            else:
+                plt.plot(x, coop_SG)
         plt.tight_layout()
         plt.show()
 
@@ -88,5 +77,35 @@ def main():
         coop_by_game.clear()
 
 
+def mainSRE():
+    plot = Plot()
+    coop_PD = []
+    coop_SG = []
+    coop_CH = []
+    aspirations = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6
+        , 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3
+        , 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4]
+    for i in range(41):
+        for game_name in ["PD", "SG", "CH"]:
+            if i % 10 == 0:
+                agt = read_data(
+                    "data/agent_act_probs_" + game_name + "_classic_0_" + str(int(aspirations[i])) + "_0-5_1000_250.p")
+            else:
+                aspirations[i] = str(aspirations[i]).replace(".", "-")
+                agt = read_data(
+                    "data/agent_act_probs_" + game_name + "_classic_0_" + str(aspirations[i]) + "_0-5_1000_250.p")
+            if game_name == "PD":
+                coop_PD.append(compute_propo_coop_mut(agt))
+            elif game_name == "SG":
+                coop_SG.append(compute_propo_coop_mut(agt))
+            else:
+                coop_CH.append(compute_propo_coop_mut(agt))
+            print(game_name + " convergence rate: " + str(compute_propo_coop_mut(agt)))
+    plot.plot_SRE_over_A0(coop_PD, coop_CH, coop_SG)
+    coop_CH.clear()
+    coop_SG.clear()
+    coop_PD.clear()
+
+
 if __name__ == '__main__':
-    main()
+    mainSRE()

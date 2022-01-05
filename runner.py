@@ -10,7 +10,6 @@ from agent import Agent
 from matrix_payoffs import Matrix_Payoffs
 from model import Bush_Mosteller
 
-
 def get_payoffs_vector(game: str = "PD", fear=False, greed=False) -> List[int]:
     """
     Returns the payoff vector for one of three games: Prisoner's Dilemma, Stag Hunt, Chicken
@@ -77,7 +76,7 @@ def compute_average_evolution(by_agent: Tuple) -> ndarray:
 def compute_propo_coop_mut(agent: Tuple) -> float:
     count = 0
     for repetition in agent:
-        count += 1 if repetition[99] > 0.99 else 0
+        count += 1 if repetition[len(repetition)-1] > 0.99 else 0
     return count / len(agent)
 
 
