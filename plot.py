@@ -42,8 +42,8 @@ class Plot:
             plt.subplot(3, 1, i + 1)
             plt.ylim(0, 1.1)
             plt.title(games[i], fontweight='bold')
-            plt.ylabel("SRE rate")
-            plt.xlabel("A0")
+            plt.ylabel("%SRE")
+            plt.xlabel("Aspiration")
             if i == 0:
                 plt.plot(x, coop_PD)
             elif i == 1:
