@@ -1,6 +1,7 @@
 import os
 import pickle
 import sys
+from multiprocessing import Process
 from typing import Tuple, List
 
 import numpy
@@ -9,6 +10,7 @@ from numpy import ndarray
 from agent import Agent
 from matrix_payoffs import Matrix_Payoffs
 from model import Bush_Mosteller
+
 
 def get_payoffs_vector(game: str = "PD", fear=False, greed=False) -> List[int]:
     """
@@ -76,7 +78,7 @@ def compute_average_evolution(by_agent: Tuple) -> ndarray:
 def compute_propo_coop_mut(agent: Tuple) -> float:
     count = 0
     for repetition in agent:
-        count += 1 if repetition[len(repetition)-1] > 0.99 else 0
+        count += 1 if repetition[-1] > 0.99 else 0
     return count / len(agent)
 
 
@@ -128,24 +130,31 @@ def main() -> List[List[str]]:
     if not os.path.exists("data/"):
         os.makedirs("data/")
 
+    processes = [Process(target=train_by_game, args=(parameters_list, game)) for game in ["PD", "CH", "SG"]]
+    for process in processes:
+        process.start()
+    for process in processes:
+        process.join()
+    return parameters_list
+
+
+def train_by_game(parameters_list: List[str], game_name: str):
     count = 0
     for i, parameters in enumerate(parameters_list):
-        for j, game_name in enumerate(["PD", "SG", "CH"]):
-            count += 1
-            print("({0}/{1}) Training: game={2} mode={3} "
-                  "h={4} A={5} l={6} reps={7} eps={8}".format(str(count), len(parameters_list) * 3, game_name,
-                                                              *parameters))
-            floats = numpy.asarray(parameters[1:4], dtype=float)
-            ints = numpy.asarray(parameters[4:], dtype=int)
-            game = Matrix_Payoffs(get_payoffs_vector(game_name, "fear" == parameters[1], "greed" == parameters[1]))
-            action_probabilities, aspirations, stimuli, action = train(game, *floats, *ints)
-            filename = game_name + "_" + "_".join(parameters)
-            filename = filename.replace(".", "-")
-            save_data(action_probabilities, "act_probs_" + filename)
-            save_data(aspirations, "asp_" + filename)
-            save_data(stimuli, "stim_" + filename)
-            save_data(action, "actions_" + filename)
-    return parameters_list
+        count += 1
+        print("({0}/{1}) Training: game={2} mode={3} "
+              "h={4} A={5} l={6} reps={7} eps={8}".format(str(count), len(parameters_list), game_name,
+                                                          *parameters))
+        floats = numpy.asarray(parameters[1:4], dtype=float)
+        ints = numpy.asarray(parameters[4:], dtype=int)
+        game = Matrix_Payoffs(get_payoffs_vector(game_name, "fear" == parameters[1], "greed" == parameters[1]))
+        action_probabilities, aspirations, stimuli, action = train(game, *floats, *ints)
+        filename = game_name + "_" + "_".join(parameters)
+        filename = filename.replace(".", "-")
+        save_data(action_probabilities, "act_probs_" + filename)
+        save_data(aspirations, "asp_" + filename)
+        save_data(stimuli, "stim_" + filename)
+        save_data(action, "actions_" + filename)
 
 
 if __name__ == '__main__':
