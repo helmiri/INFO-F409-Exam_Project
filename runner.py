@@ -34,7 +34,7 @@ def get_payoffs_vector(game: str = "PD", fear=False, greed=False) -> List[int]:
     if fear:
         pd[sucker] = -1
     elif greed:
-        pd[reward] = 5
+        pd[temptation] = 5
     return pd
 
 
@@ -77,8 +77,9 @@ def compute_average_evolution(by_agent: Tuple) -> ndarray:
 
 def compute_propo_coop_mut(agent: Tuple) -> float:
     count = 0
+    index = 99 if len(agent[0]) < 500 else 499
     for repetition in agent:
-        count += 1 if repetition[-1] > 0.99 else 0
+        count += 1 if repetition[index] > 0.999 else 0
     return count / len(agent)
 
 
@@ -147,7 +148,7 @@ def train_by_game(parameters_list: List[str], game_name: str):
                                                           *parameters))
         floats = numpy.asarray(parameters[1:4], dtype=float)
         ints = numpy.asarray(parameters[4:], dtype=int)
-        game = Matrix_Payoffs(get_payoffs_vector(game_name, "fear" == parameters[1], "greed" == parameters[1]))
+        game = Matrix_Payoffs(get_payoffs_vector(game_name, "fear" == parameters[0], "greed" == parameters[0]))
         action_probabilities, aspirations, stimuli, action = train(game, *floats, *ints)
         filename = game_name + "_" + "_".join(parameters)
         filename = filename.replace(".", "-")
