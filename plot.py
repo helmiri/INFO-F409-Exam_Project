@@ -21,7 +21,7 @@ class Plot:
         for game in range(len(data)):
             plt.subplot(3, 1, game + 1)
             plt.ylim(0, 1.1)
-            plt.xlim(0, 500)
+            plt.xlim(0, len(data[game]))
             plt.title(games[game], fontweight='bold')
             plt.ylabel(parameters_name)
             plt.xlabel("Iterations")
@@ -70,17 +70,20 @@ class Plot:
             plt.ylabel("%SRE")
             plt.xlabel("Aspiration")
             if i == 0:
-                plt.plot(x, PD_classic)
-                plt.plot(x, PD_fear)
-                plt.plot(x, PD_greed)
+                plt.plot(x, PD_classic, label="classic", linestyle="dashed")
+                plt.plot(x, PD_fear, label="fear")
+                plt.plot(x, PD_greed, label="greed")
+                plt.legend(["classic", "fear", "greed"])
             elif i == 1:
-                plt.plot(x, CH_classic)
-                plt.plot(x, CH_fear)
-                plt.plot(x, CH_greed)
+                plt.plot(x, CH_classic, label="classic", linestyle="dashed")
+                plt.plot(x, CH_fear, label="fear")
+                plt.plot(x, CH_greed, label="greed")
+                plt.legend(["classic", "fear", "greed"])
             else:
-                plt.plot(x, SG_classic)
-                plt.plot(x, SG_fear)
-                plt.plot(x, SG_greed)
+                plt.plot(x, SG_classic, label="classic", linestyle="dashed")
+                plt.plot(x, SG_fear, label="fear")
+                plt.plot(x, SG_greed, label="greed")
+                plt.legend(["classic", "fear", "greed"])
         plt.tight_layout()
         plt.show()
 
@@ -91,7 +94,7 @@ def main():
         for i in range(len(sys.argv[1:])):
             sys.argv[i] = sys.argv[i].replace(".", "-")
         parameters_list.append(sys.argv[1:])
-    elif len(sys.argv) == 2:
+    elif len(sys.argv) == 3:
         with open(sys.argv[1], "r") as parameters_file:
             lines = parameters_file.readlines()
         for line in lines:
@@ -104,9 +107,9 @@ def main():
             agt = read_data("data/agent_act_probs_{0}_{1}_{2}_{3}_{4}_{5}_{6}.p".format(game_name, *parameters))
             coop_by_game.append(agt[10])
             print(game_name + " convergence rate: " + str(compute_propo_coop_mut(agt)))
-        print("PD : ", sum(coop_by_game[0]) / len(coop_by_game[0]))
-        print("SG : ", sum(coop_by_game[1]) / len(coop_by_game[1]))
-        print("CH : ", sum(coop_by_game[2]) / len(coop_by_game[2]))
+        print("PD cooperation rate: ", sum(coop_by_game[0]) / len(coop_by_game[0]))
+        print("SG cooperation rate: ", sum(coop_by_game[1]) / len(coop_by_game[1]))
+        print("CH cooperation rate: ", sum(coop_by_game[2]) / len(coop_by_game[2]))
         plot.plot_cooperation(coop_by_game, "Proba. of cooperation")
         coop_by_game.clear()
 
@@ -116,9 +119,7 @@ def mainSRE():
     coop_PD = []
     coop_SG = []
     coop_CH = []
-    aspirations = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6
-        , 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3
-        , 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4]
+    aspirations = [round(0.1 * i, 1) for i in range(41)]
     for i in range(41):
         for game_name in ["PD", "SG", "CH"]:
             if i % 10 == 0:
@@ -152,9 +153,7 @@ def mainGreedFearSRE():
     CH_classic = []
     CH_fear = []
     CH_greed = []
-    aspirations = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6
-        , 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3
-        , 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4]
+    aspirations = [round(0.1 * i, 1) for i in range(41)]
     for i in range(41):
         for game_name in ["PD", "SG", "CH"]:
             if i % 10 == 0:
@@ -192,4 +191,10 @@ def mainGreedFearSRE():
 
 
 if __name__ == '__main__':
-    mainGreedFearSRE()
+    if len(sys.argv) == 3:
+        if sys.argv[2] == "cooperation":
+            main()
+        elif sys.argv[2] == "sre":
+            mainSRE()
+        elif sys.argv[2] == "fear_greed":
+            mainGreedFearSRE()
