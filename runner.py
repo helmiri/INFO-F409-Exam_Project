@@ -79,7 +79,7 @@ def compute_propo_coop_mut(agent: Tuple) -> float:
     count = 0
     index = 99 if len(agent[0]) < 500 else 499
     for repetition in agent:
-        count += 1 if repetition[index] > 0.999 else 0
+        count += 1 if repetition[index] > 0.9 else 0
     return count / len(agent)
 
 
